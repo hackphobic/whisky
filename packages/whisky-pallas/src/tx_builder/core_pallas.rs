@@ -1,4 +1,4 @@
-use std::collections::{HashMap, BTreeMap};
+use std::collections::HashMap;
 
 use pallas::codec::utils::PositiveCoin;
 use pallas::ledger::primitives::conway::{
@@ -1502,12 +1502,12 @@ impl CorePallas {
                     _ => None,
                 };
 
-                let mut map = BTreeMap::new();
-                cost_model.map(|cm| map.insert(
-                    version,
-                    cm.clone()
-                ));
-                let language_view = LanguageViews(map);
+                let language_view = LanguageViews(
+                    cost_model
+                        .into_iter()
+                        .map(|cm| (version, cm.clone()))
+                        .collect()
+                );
 
                 Some(
                     ScriptData::build_for(&witness_set.inner, &Some(language_view))
