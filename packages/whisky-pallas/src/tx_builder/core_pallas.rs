@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, BTreeMap};
 
 use pallas::codec::utils::PositiveCoin;
 use pallas::ledger::primitives::conway::{
-    LanguageView, Redeemer as PallasRedeemer, RedeemerTag as PallasRedeemerTag, ScriptData,
+    LanguageViews, Redeemer as PallasRedeemer, RedeemerTag as PallasRedeemerTag, ScriptData,
     Value as PallasValue, WitnessSet as PallasWitnessSet,
 };
 use pallas::ledger::primitives::Fragment;
@@ -1501,9 +1501,16 @@ impl CorePallas {
                     2 => cost_models.get(2),
                     _ => None,
                 };
-                let language_view = cost_model.map(|cm| LanguageView(version, cm.clone()));
+
+                let mut map = BTreeMap::new();
+                cost_model.map(|cm| map.insert(
+                    version,
+                    cm.clone()
+                ));
+                let language_view = LanguageViews(map);
+
                 Some(
-                    ScriptData::build_for(&witness_set.inner, &language_view)
+                    ScriptData::build_for(&witness_set.inner, &Some(language_view))
                         .unwrap()
                         .hash()
                         .to_string(),
